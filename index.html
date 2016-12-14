@@ -1,0 +1,293 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <style type="text/css">
+            .payment-wrapper{
+                width:400px;
+                padding:10px;
+                float:left;
+                background: #f9f9f7;
+                border-radius:10px;
+            }
+        </style>
+    
+
+		<div class="container">
+            <div class="row">
+                <div class="payment-wrapper">
+                    <div class="col-md-12">
+                        <form name="CreditCardForm" id="CreditCardForm" onsubmit="makePayment(this, event)">
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <label>Card Number</label>
+                                    <input type="text" name="CardNumber" class="form-control"/>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <label>Card Type</label>
+                                    <input type="text" name="CardType" class="form-control" />
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <div class="col-md-3">
+                                    <label>Expiry Month</label>
+                                    <input type="text" id="ExpiryMonth" name="ExpiryMonth" class="form-control"/>
+                                </div>
+                                
+                                <div class="col-md-3">
+                                    <label>Expiry Year</label>
+                                    <input type="text" id="ExpiryYear" name="ExpiryYear" class="form-control"/>
+                                </div>
+                            
+                                <div class="col-md-3"></div>
+                                
+                                <div class="col-md-3">
+                                    <label>CVV No.</label>
+                                    <input type="text" id="CVVNo" name="CVVNo" class="form-control"/>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <div class="col-md-6">
+                                    <label>First Name</label>
+                                    <input type="text" id="FirstName" name="FirstName" class="form-control"/>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label>Last Name</label>
+                                    <input type="text" id="LastName" name="LastName" class="form-control"/>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <div class="col-md-6"></div>
+                                <div class="col-md-6">
+                                    <input type="submit" value="Submit" class="btn btn-primary form-control"/>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <script type="text/javascript">
+                
+                function CreaditCardDTO(number, type, month, year, cvv, fname, lname){
+                    this.number_Z = number;
+                    this.type = type;
+                    this.expire_month = month;
+                    this.expire_year = year;
+                    this.cvv2 = cvv;
+                    this.first_name = fname;
+                    this.last_name = lname;
+                }
+
+
+                var pritzValidator  = {
+                	author : 'Pritam',
+                    
+                    validatorFunctions : {
+	                    minLength :function (text, minLength){
+	                        if(text.length < minLength) 
+                                return false; 
+                            return true;
+	                    },
+
+                        maxLength :function (text, maxLength){
+                            if(text.length > maxLength)
+                                return false;
+                             return true;
+                        },
+
+	                    validateText : function(text, isValidate){
+	                        return /^[A-Za-z]*$/.test(text);
+	                    },
+
+	                    validateNumber : function(text, isValidate){
+	                        if(isValidate){
+                                return /^[0-9]*$/.test(text);
+                            }
+                            return true;
+	                    },
+
+                        fixedLength: function(text, length){
+                            return text.length == length;
+                        },
+
+	                    required : function(text, isValidate){
+                            if(isValidate){
+	                    	  return text.length > 0;
+                            }
+                            return true;
+	                    }
+
+	                },
+
+                    validate : function(form, validators, messages){
+                        // this - pritzValidator
+                        var self = this;
+                        var isFormValid = true;
+
+                        self.clearAllValidationErrors();
+                        
+                        // for each field in validators
+                        for(var fieldName in validators) {
+
+                        	var isFieldValid = true;	
+                            var fieldValue = form[fieldName].value;
+                            // var each validator for field
+                            for(var validatorName in validators[fieldName]) {
+                            	if(isFieldValid){
+                                    // call validator function
+	                            	if(self.validatorFunctions[validatorName](fieldValue, validators[fieldName][validatorName]) == false){
+	                            		isFormValid = false;
+                                        isFieldValid = false;
+	                            		// show error on page
+	                            		// get message to show
+	                            		// if user have not provided message take from default messages
+	                            		var message;
+	                            		if(typeof messages[fieldName] == 'undefined' || 
+	                            				typeof messages[fieldName][validatorName] == 'undefined'){
+
+	                            			message = self.defaults.messages[validatorName];
+	                            		}
+	                            		else{
+	                            			message = messages[fieldName][validatorName];	
+	                            		}
+	                            		self.showError(form[fieldName], message);
+	                            	}
+                            	}
+                            }
+						}
+                        return isFormValid;
+                    },
+
+                    showError: function(element, message){
+                    	var errorNode = document.createElement('div');
+                    	errorNode.className = 'text error';
+                    	errorNode.innerHTML = message;
+                    	element.parentNode.appendChild(errorNode);
+                    }, 
+
+                    defaults:{
+                    	messages : {
+                    		required : 'This field is required.', 
+                    		validateNumber : 'Invalid Number', 
+                            validateText: 'Invalid text',
+                            minLength: 'Too short',
+                            maxLength: 'Too long', 
+                            fixedLength : 'Invalid length'
+                    	}
+                    },
+
+                    clearAllValidationErrors: function(){
+                    	var errorElements = document.getElementsByClassName("error");
+                    	errorElementsLength = errorElements.length;
+                    	if(errorElements.length > 0){
+                    		console.log(errorElements.length);
+                    		for(var i = 0; i < errorElementsLength; i++){
+                    			errorElements[i].parentNode.removeChild(errorElements[i]);
+                    			errorElementsLength--;
+                    			i--;
+                    		}
+                    	}
+                    }
+                };
+
+                var creditCardValidator = {
+                    FirstName : {
+                        required : true,
+                        validateText : true
+                    }, 
+                    LastName : {
+                		required : true,
+                        validateText : true
+                	}, 
+                    CVVNo : {
+                		required : true, 
+                		validateNumber : true,
+                        fixedLength : 3
+                	}, 
+                    ExpiryMonth: {
+                        required:true,
+                        validateNumber : true,
+                        maxLength:2
+                    },
+                    ExpiryYear: {
+                        required:true,
+                        validateNumber : true,
+                        fixedLength : 4
+                    }
+                    
+                };
+
+                var creditCardValidatorMessages = {
+                   	FirstName : {
+                        required : 'First Name is required',
+                        validateText : 'Invalid first name'
+                    }, 
+                    LastName : {
+                        required : 'Last Name is required',
+                        validateText : 'Invalid last name'
+                    }, 
+                    CVVNo : {
+                        required : 'CVV no is required', 
+                        validateNumber : 'Invalid CVV number',
+                        fixedLength : 3
+                    }, 
+                    ExpiryMonth: {
+                        required: 'Expiry month is required',
+                        validateNumber : 'Invalid Expiry month',
+                        maxLength: 'Invalid Expiry month'
+                    },
+                    ExpiryYear: {
+                        required: 'Expiry year is required',
+                        validateNumber : 'Invalid expiry year',
+                        fixedLength : 'Invalid expiry year'
+                    }
+                };
+
+                
+                
+                function getCard(cardForm){
+                    //var cardForm = document.forms["CreditCardForm"];
+                    var card = new CreaditCardDTO(  cardForm["CardNumber"].value, 
+                                                cardForm["CardType"].value, 
+                                                cardForm["ExpiryMonth"].value, 
+                                                cardForm["ExpiryYear"].value,
+                                                cardForm["CVVNo"].value, 
+                                                cardForm["FirstName"].value,
+                                                cardForm["LastName"].value );
+                    return card;
+                }
+        
+                function makePayment(cardForm, e){
+                    e.preventDefault();
+                    var card = getCard(cardForm);
+                    var isValid = pritzValidator.validate(cardForm, creditCardValidator, creditCardValidatorMessages);
+                    if(isValid){
+                        var options = {
+                            url : 'TwoCanConnectPaymentController.makePayment',
+                            params : [card]
+                          };
+                        var response = VF.invokeAction(options);
+                        
+                         // success function
+                        response.done(function(result){   
+                            console.log(result);
+                        });
+                         // failure function
+                        response.fail(function(result, error){
+                            console.log(result); 
+                        });
+                    }
+                }    
+			</script>
+        </div>
+    </body>
+</html>
