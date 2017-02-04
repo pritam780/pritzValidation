@@ -1,6 +1,5 @@
 var pritzValidator  = {
-	author : 'Pritam',
-    validators : {
+	validators : {
         validateLength :function (text, minLength, maxLength){
             if(text.length < minLength || text.length > maxLength) return false;
         },
@@ -16,6 +15,7 @@ var pritzValidator  = {
         required : function(text){
         	return text.length > 0;
         }
+		
 
     },
 
